@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/sideshow/apns2"
-	"github.com/sideshow/apns2/token"
+	"github.com/mark2b/apns2"
+	"github.com/mark2b/apns2/token"
 )
 
 func main() {
