@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sideshow/apns2/token"
+	"github.com/mark2b/apns2/token"
 	"golang.org/x/net/http2"
 )
 
@@ -135,6 +135,23 @@ func (c *Client) Production() *Client {
 	return c
 }
 
+// Mock sets the Client to use the APNs mock push endpoint.
+func (c *Client) Mock(endpoint string) *Client {
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify:true,
+	}
+	transport := &http2.Transport{
+		TLSClientConfig: tlsConfig,
+		DialTLS:         DialTLS,
+	}
+	c.HTTPClient = &http.Client{
+		Transport: transport,
+		Timeout:   HTTPClientTimeout,
+	}
+	c.Host = endpoint
+	return c
+}
+
 // Push sends a Notification to the APNs gateway. If the underlying http.Client
 // is not currently connected, this method will attempt to reconnect
 // transparently before sending the notification. It will return a Response
@@ -198,8 +215,8 @@ func (c *Client) CloseIdleConnections() {
 }
 
 func (c *Client) setTokenHeader(r *http.Request) {
-	bearer := c.Token.GenerateIfExpired()
-	r.Header.Set("authorization", fmt.Sprintf("bearer %v", bearer))
+	c.Token.GenerateIfExpired()
+	r.Header.Set("authorization", fmt.Sprintf("bearer %v", c.Token.Bearer))
 }
 
 func setHeaders(r *http.Request, n *Notification) {
